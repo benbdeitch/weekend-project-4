@@ -1,0 +1,80 @@
+So, what are our goals? 
+
+For this, we need cards. The cards need three attributes. Suit, name, and value. (name and value will differ for the face cards. )
+when instantiated, they will accept two values, name and suit. The value will be decided by an if-chain that if it's a number, it goes to the value. Otherwise, the value is 10; save for the Ace, which has a value of 1, 11. 
+
+In order to handle this, let's make the value attribute an array, for all cards. For all but the ace, it'll be [value, value], with both the same. How we'll have it is that *normally*, it will use the first value; ---- but use the second, instead, if using the first would push it over 21. 
+
+The cards will need to be able to be shuffled/reshuffled, but I don't think they need to keep track of that. They will, however, need a 'visible'/'not visible' attribute. 
+
+
+cash_bag object:
+one attribute, .value, which returns the contents. 
+method:  add money, or subtract money from value. 
+
+deck objects:
+attributes: an array of cards
+methods: draw card off the top. (accepts nothing, pops one card off the top of the array.)
+        reshuffle accepts nothing, outputs nothing- randomizes order. 
+        empty deck- deletes all cards from the array (by repointing it towards an empty set)
+        combine deck: accepts another deck. Extends their array by the value of deck2s, and then empties deck2
+
+
+overarching player class: 
+
+--array of players. Generally will have one value; exists to facilitate splitting hands. It's length is checked by the elements inside, before permitting splitting a hand. 
+
+Player Objects: 
+-- hand: array of cards
+-- cash : instantiates a cash_bag object based on the value passed to it. .  
+-- computer:   Boolean value. Determined at creation, and changes up how the 'play' method runs. 
+                    Ai Rules: Take clues from the dealer. They'll largely play similarly-- let's actually make a few personality types. Let's go for 'safe', 'normal', 'reckless'--- to be decided later. 
+                    safe will never split or double down. Normal will do so, if they would not be betting more than 1/4 of their total cash. Reckless will always do so. 
+methods: 
+    hit(accepts a deck, adds the top card of that deck to their hand.)
+    raise-bet: Accept an amount of money, subtract it from the player.cash, and add it to player.bet 
+                on win, player.bet *2 is added to the table, and player.bet is removed from the dealer's cash pool. On loss, the bet is added to dealer-cash. O
+    add card-- takes a card, and accepts it to their hand
+    split hand-- only if you are dealt two of the same card. Doubles the bet, and you play both hands. Can split up to three times. How do you do this? You probably have it create another player-- let's call it a 'phantom', who gets one of their cards.  However, they share the same cash-pool, and aren't allowed to change up their bet. Limit of four times, total.  
+
+dealer objects: inherits from player
+    attributes - hand, cash
+    methods- 
+    accepts a card-- adds it to their hand. 
+    play: 
+        plays through their turn, as they don't get a choice in how to play.
+        1: reveal their face-down card
+        2: if 16 or under, hit a card.
+        3: if 17 or more, stand. 
+
+play. 
+
+the play method is the dealer resolving their own hand. They stand at 17+, and otherwise hit. No choice is allowed. The game is played solely versus the dealer. 
+
+Next, we have the 'game table' attributes. This should be an object that has several attributes: 
+-- a dealer (dealer object type)
+-- an array of players (player object types)
+--a discard pile (array of cards-- it starts off as empty)
+--a deck(array of cards. To do- check if it needs to start off as four deck objects shuffled together.)
+
+methods: The table will create a dealer, and a deck, at instantiation. 
+
+It will have a function: add (overarching) player-- that does what it says on the tin. 
+It will also have a play
+--
+Next, we have the 'player', attribute. Players must be able to keep their hand, or hit. They also have an amount of money, and need to be able to bet it. Players thus have a 'finances' attribute, as well as a 'hand' attribute that will be an array of cards.  The player needs a fair few methods.
+
+They need to be able to 'bet', which should subtract their money, and put it into a pot. 
+
+
+
+-----------------------------------------
+Now, how should the program run? Let's assume everybody has access to credit, and plays for 10 dollar hands. Let's have everybody start off with 0 money-- we'll be tracking their gains, not their 
+
+Let's have two different playstyles. Let's have a player controlled game, and  a simulated game with CPUs. 
+
+for the CPU game, you have a certain number of hands that you order it to play. 
+
+For the player game, you play a hand, and then it asks you if you'd like to play again, keeping track of your earnings if so. 
+
+
