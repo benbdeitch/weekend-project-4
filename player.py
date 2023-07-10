@@ -52,6 +52,9 @@ class Player:
             else:
                 total = -1
                 break
+        if total == 21 and len(self.hand) == 2:
+            return 100
+        
         return total
 
 

@@ -94,7 +94,7 @@ class Game_Window:
             self.player_hand.append(tk.Frame(width=73, height= 98, relief= tk.RAISED, borderwidth = 1, padx = 20, bg = 'green'))
             self.player_hand[i].grid(row = 3, column = i+1)
 
-        self.window.rowconfigure(2, weight=1, minsize=300)
+        self.window.rowconfigure(2, weight=1, minsize=200)
 
         #deck frame
         deck_frame = tk.Frame()
@@ -110,12 +110,15 @@ class Game_Window:
         top_frame.grid(row = 0, column = 0)
         dealer_label = tk.Label(top_frame, text = "Dealer's Hand")
         dealer_label.grid()
-        dealer_cash = tk.Label(top_frame, text = "$-{:.2f}".format(self.player.get_cash()))
+        dealer_cash = tk.Label(top_frame, text = "${:.2f}".format(-1 *self.player.get_cash() + 100))
         dealer_cash.grid()
         bottom_frame = tk.Frame(self.window, bg = 'red', height = 150, padx = 20, pady = 40)
         bottom_frame.grid(row = 3, column = 0)
+        player_cash = tk.Label(bottom_frame, text = "${:.2f}".format(self.player.get_cash()))
+        player_cash.grid()
         player_label = tk.Label(bottom_frame, text = "Player's Hand")
         player_label.grid()
+        
         
         self.minor_frame = tk.Frame(self.window, background='green', pady = 60)
         self.minor_frame.grid(row = 4, column = 1)
@@ -145,7 +148,9 @@ class Starter:
         self.window = window 
         self.variable = variable
         self.parent = parent
-        minor_frame = parent.minor_frame
+        self.player_picture = []
+        self.dealer_picture = []
+        
         self.tinyframe = []
         self.tinyframe.append(tk.Frame(window, bg = 'green', padx = 20, pady = 20))
         
@@ -159,37 +164,81 @@ class Starter:
      
         self.tinyframe.append( tk.Frame(window, bg = 'green', padx = 20, pady = 20))
         
-        def chec
-
-        def update_cards():
-            for x in range(len(self.parent.dealer.hand)):
-                data = self.parent.dealer.hand[x].to_image()
+        def reveal_hand():
+            for x in self.parent.dealer.hand():
+                x.show()
+            
+        def score_loop(entity):
+            score = entity.score_hand()
+            match score:
+                case 100:
+                    return "Blackjack!" 
+                case -1:
+                    return "Bust"
+                case _:
+                    return score
+            
+        def you_lose():
+            pass
+        def update_cards(player):
+            if player == self.parent.player:
+                self.picture = self.player_picture
+            else:
+                self.picture = self.dealer_picture
+            for x in self.dealer_picture:
+                x.grid_forget()
+            else:
+                self.picture = []
+            for x in range(len(player.hand)):
+                data = player.hand[x].to_image()
                 image_name = data[1]
                 data = data[0]
                 print(image_name)
                 image1 = Image.open(image_name)
                 cropped_image = image1.crop((data[0], data[1], data[2], data[3]))
                 card_img= ImageTk.PhotoImage(cropped_image)
-                picture = tk.Label(self.parent.dealer_hand[x], image = card_img, width = 73, height = 98)
-                picture.image = card_img
-                picture.grid()
-                data = self.parent.player.hand[x].to_image()
-                image_name = data[1]
-                data = data[0]
-                print(image_name)
-                image1 = Image.open(image_name)
-                cropped_image = image1.crop((data[0], data[1], data[2], data[3]))
-                card_img= ImageTk.PhotoImage(cropped_image)
-                picture = tk.Label(self.parent.player_hand[x], image = card_img, width = 73, height = 98)
-                picture.image = card_img
-                picture.grid()
+                if player == self.parent.dealer:
+                    self.picture.append( tk.Label(self.parent.dealer_hand[x], image = card_img, width = 73, height = 98))
+                if player == self.parent.player:
+                    self.picture.append(tk.Label(self.parent.player_hand[x], image = card_img, width = 73, height = 98))
+                self.picture[x].image = card_img
+                self.picture[x].grid()
+                
             five_bet.grid_forget()
             ten_bet.grid_forget()
             fifteen_bet.grid_forget()
             twenty_bet.grid_forget()
 
-            
+        def hit_me(event):
+            card = self.parent.deck.take_card()
+            self.parent.player.hit(card)
+            data = card.to_image()
+            image_name = data[1]
+            data = data[0]
+            print(image_name)
+            image1 = Image.open(image_name)
+            cropped_image = image1.crop((data[0], data[1], data[2], data[3]))
+            card_img= ImageTk.PhotoImage(cropped_image)
+            self.picture.append(tk.Label(self.parent.player_hand[len(self.picture)% 6], image = card_img, width = 73, height = 98))
+            self.picture[-1].image = card_img
+            self.picture[-1].grid()
+            self.parent.player.hit(card)
+            result = score_loop(self.parent.player)
+            match result:
+                case -1:
+                    pass
 
+
+
+
+        def game_end(winner):
+            if winner:
+                pass 
+        def game_loop():
+            pass
+
+
+        
         def start_play(self):
             
             self.tinyframe[4].grid(row = 4, column = 5)
@@ -200,7 +249,11 @@ class Starter:
             print(self.parent.dealer.hand)
             self.parent.player.hit(self.parent.deck.take_card())
             self.parent.player.hit(self.parent.deck.take_card())
-            update_cards()
+            update_cards(self.parent.dealer)
+            update_cards(self.parent.player)
+            print(score_loop(self.parent.dealer))
+            if score_loop(self.parent.dealer) == "Blackjack!":
+                pass
 
         def add_bet_5():
             self.parent.player.make_wager(self.variable.get())
@@ -214,6 +267,7 @@ class Starter:
             self.parent.player.make_wager(self.variable.get()*2)
             for x in range(len(self.tinyframe)-2):
                 self.tinyframe[x].grid_forget()
+            
             self.parent.message.configure(text = "WAGER:  ${:.2f}".format(self.variable.get()*2))
             start_play(self)
                 
@@ -249,9 +303,9 @@ class Starter:
         twenty_bet.grid(row = 0, column = 0)
 
         #Hit/Stay button 
-        hit_button = ttk.Button(self.tinyframe[4], text ="Hit!".format(self.variable.get()*4), command = add_bet_20)
-        
+        hit_button = ttk.Button(self.tinyframe[4], text ="Hit!".format(self.variable.get()*4))
+        hit_button.bind('<Button-1>', hit_me)
         hit_button.grid(row = 0, column = 0)
-        stay_button = ttk.Button(self.tinyframe[5], text ="Stay".format(self.variable.get()*4), command = add_bet_20)
+        stay_button = ttk.Button(self.tinyframe[5], text ="Stay".format(self.variable.get()*4), )
         stay_button.grid()
         
