@@ -1,9 +1,8 @@
 from card import Card
-from deck import Deck 
-from game_table import Table
+from deck import Deck
 import window
 from vary import Vary
-
+from player import Player
 
 
 player_number = ""
@@ -17,4 +16,5 @@ run = window.Intro(vary)
 if not vary.get():
     quit()
 
-run = window.Starter(vary)
+vary.set(5)
+run = window.Game_Window(vary)

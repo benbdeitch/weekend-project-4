@@ -35,9 +35,10 @@ class Card:
             case "ace":
                 self.value = [11,1]
         
-    def show(self):
-        self.show = True
 
+
+    def hide(self):
+        self.show = False
     def __repr__(self):
         if self.show:
             return f'[{self.name.title()} of {self.suit.title()}]'
@@ -45,13 +46,14 @@ class Card:
     
 
     def to_image(self):
+        if self.show:
+            try:
+                value1 = (int(self.name)-1) * 73
+            except:
+                dict = {"ace":0, "jack": 10, "queen": 11, "king": 12}
+                value1 = dict[self.name] *73
         
-        try:
-            value1 = (int(self.name)-1) * 73
-        except:
-            dict = {"ace":0, "jack": 10, "queen": 11, "king": 12}
-            value1 = dict[self.name] *73
-        
-        dict = {"clubs":0, "spades": 1, "hearts":2, "diamonds": 3}
-        value2 = dict[self.suit] * 98
-        return [value1, value2, value1 + 73, value2+98]
+            dict = {"clubs":0, "spades": 1, "hearts":2, "diamonds": 3}
+            value2 = dict[self.suit] * 98
+            return [[value1, value2, value1 + 73, value2+98], "images/cards.png"]
+        return [[0, 0, 73, 98], "images/card_back.png"]

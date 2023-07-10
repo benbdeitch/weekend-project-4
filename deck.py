@@ -27,8 +27,13 @@ class Deck:
         self.shuffle()
 
     #Removes the top card:
-    def take_card(self):
+    def take_card(self): 
         return self.cards.pop()
+    
+    def take_card_hide(self):
+        card =self.cards.pop()
+        card.hide()
+        return card
     
     def __repr__(self):
         string= []

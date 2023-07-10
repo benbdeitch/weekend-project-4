@@ -2,7 +2,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 from deck import Deck
-from game_table import table
+
+from player import Player
 class Intro():
 
     def __init__(self, variable):
@@ -10,20 +11,23 @@ class Intro():
         self.window = tk.Tk()
         self.window.configure(bg = 'green')
         #setting up the grid
-        frame = tk.Frame(self.window, bg = 'green')
-        frame.grid(row =0, column = 0)
-        welcome = tk.Label(frame, bg= 'green', text= "Welcome to Blackjack", font=("Arial", 25), padx = 150, pady = 60)
+        self.frame = tk.Frame(self.window, bg = 'green')
+        self.frame.grid(row =0, column = 0)
+        welcome = tk.Label(self.frame, bg= 'green', text= "Welcome to Blackjack", font=("Arial", 25), padx = 150, pady = 60)
         welcome.grid()
         minor_frame = tk.Frame(self.window, background='green', pady = 60)
         minor_frame.grid(row = 9, column = 0)
         #Handling the randomized image
         self.deck1 = Deck(1)
-        self.image1 = Image.open("images/cards.png")
-        coords = self.deck1.take_card().to_image()
         
+        
+        coords = self.deck1.take_card().to_image()
+        image_name = coords[1]
+        coords = coords[0]
+        self.image1 = Image.open(image_name)
         cropped_image = self.image1.crop((coords[0], coords[1], coords[2], coords[3]))
         card_img= ImageTk.PhotoImage(cropped_image)
-        self.card_label = tk.Label(frame, image=card_img, background= 'green')
+        self.card_label = tk.Label(self.frame, image=card_img, background= 'green')
         self.card_label.grid(row = 3, column = 0)
 
         def close():
@@ -38,9 +42,10 @@ class Intro():
                 self.deck1 = Deck(1)
             
             coords = self.deck1.take_card().to_image()
-            print(coords)
+            image_name = coords[1]
+            self.image1 = Image.open(image_name)
+            coords = coords[0]
             cropped_image = self.image1.crop((coords[0], coords[1], coords[2], coords[3]))
-            
             card_img= ImageTk.PhotoImage(cropped_image)
             self.card_label.image = card_img
             self.card_label.configure(image = card_img)
@@ -64,56 +69,174 @@ class Intro():
 
         self.window.mainloop()
 
-
-class Starter:
-
+class Game_Window:
     def __init__(self,variable): 
+        self.deck = Deck(6)
+        self.player = Player(100)
+        self.dealer = Player(100)
+         
+         
+         
+         
+         
+         
          #setting up the window
         self.variable = variable
         self.window = tk.Tk()
         self.window.configure(bg = 'green')
-        #setting up the grid
-        frame = tk.Frame(self.window, bg = 'green')
-        frame.grid(row =0, column = 0)
-        welcome = tk.Label(frame, bg= 'green', text= "Select your starting bet", font=("Arial", 25), padx = 150, pady = 60)
-        welcome.grid()
-        minor_frame = tk.Frame(self.window, background='green', pady = 60)
-        minor_frame.grid(row = 9, column = 0)
-        tinyframe_1 = tk.Frame(minor_frame, bg = 'green', padx = 20)
-        tinyframe_1.grid(row = 0, column = 1)
-        tinyframe_2 = tk.Frame(minor_frame, bg = 'green', padx = 20)
-        tinyframe_2.grid(row = 0, column = 2)
-        tinyframe_3 = tk.Frame(minor_frame, bg = 'green', padx = 20)
-        tinyframe_3.grid(row = 0, column = 3)
-        tinyframe_4 = tk.Frame(minor_frame, bg = 'green', padx = 20)
-        tinyframe_4.grid(row = 0, column = 4)
+        self.window.columnconfigure(0, weight=1, minsize=42)
+        self.dealer_hand =  []
+        self.player_hand = []
+        for i in range(6):
+            self.window.columnconfigure(i+1, weight = 1, minsize = 80)
+            self.dealer_hand.append(tk.Frame(width=73, height= 98, relief= tk.RAISED, borderwidth = 1, padx = 20, bg = 'green'))
+            self.dealer_hand[i].grid(row = 0, column = i+1)
+            self.player_hand.append(tk.Frame(width=73, height= 98, relief= tk.RAISED, borderwidth = 1, padx = 20, bg = 'green'))
+            self.player_hand[i].grid(row = 3, column = i+1)
+
+        self.window.rowconfigure(2, weight=1, minsize=300)
+
+        #deck frame
+        deck_frame = tk.Frame()
+        deck_frame.grid(row = 2, column = 1)
+        card_back = ImageTk.PhotoImage(Image.open("images/card_back.png"))
+        deck_back = tk.Label(deck_frame, image = card_back)
+        deck_back.grid()
+
         
-        def set_vary_5():
-            self.variable.set(5.00)
-            print(self.variable.get())
-        def set_vary_10():
-            self.variable.set(10.00)
-            print(self.variable.get())
-        def set_vary_15():
-            self.variable.set(10.00)
-            print(self.variable.get())
-        def set_vary_20():
-            self.variable.set(10.00)
-            print(self.variable.get())
+
+        #setting up the grid
+        top_frame = tk.Frame(self.window, bg = 'red', height = 150, padx = 20, pady = 40)
+        top_frame.grid(row = 0, column = 0)
+        dealer_label = tk.Label(top_frame, text = "Dealer's Hand")
+        dealer_label.grid()
+
+        bottom_frame = tk.Frame(self.window, bg = 'red', height = 150, padx = 20, pady = 40)
+        bottom_frame.grid(row = 3, column = 0)
+        player_label = tk.Label(bottom_frame, text = "Player's Hand")
+        player_label.grid()
+        
+        self.minor_frame = tk.Frame(self.window, background='green', pady = 60)
+        self.minor_frame.grid(row = 4, column = 1)
+        
+        
+        self.outside = Starter(self.variable, self.window,self)
+        text_grid= tk.Frame(self.window, background= 'green')
+        text_grid.grid(columnspan=2, row = 2, column = 2)
+
+        def play():
+            self.play_label.grid_forget()
+            self.message = tk.Label(text_grid, text = "Make a Bet")
+            self.message.grid()
+            for x in range(len(self.outside.tinyframe)-2):
+                self.outside.tinyframe[x].grid(row = 4, column = x+1 )
+        play_frame = tk.Frame(self.window, background='green')
+        play_frame.grid(row = 2, column = 0)
+        self.play_label = ttk.Button(play_frame, text = "Play", command = play)
+        self.play_label.grid()
+
+        self.window.mainloop()
+
+
+class Starter:
+
+    def __init__(self,variable, window, parent): 
+        self.window = window 
+        self.variable = variable
+        self.parent = parent
+        minor_frame = parent.minor_frame
+        self.tinyframe = []
+        self.tinyframe.append(tk.Frame(window, bg = 'green', padx = 20, pady = 20))
+        
+        self.tinyframe.append(tk.Frame(window, bg = 'green', padx = 20, pady = 20))
+    
+        self.tinyframe.append(tk.Frame(window, bg = 'green', padx = 20, pady = 20))
+
+        self.tinyframe.append(tk.Frame(window, bg = 'green', padx = 20, pady = 20))
+       
+        self.tinyframe.append(tk.Frame(window, bg = 'green', padx = 20, pady = 20))
+     
+        self.tinyframe.append( tk.Frame(window, bg = 'green', padx = 20, pady = 20))
+        
+
+        def update_cards():
+            for x in range(len(self.parent.dealer.hand)):
+                data = self.parent.player.hand[x].to_image()
+                image_name = data[1]
+                data = data[0]
+                print(image_name)
+                image1 = Image.open(image_name)
+                cropped_image = image1.crop((data[0], data[1], data[2], data[3]))
+                card_img= ImageTk.PhotoImage(cropped_image)
+                picture = tk.Label(self.parent.dealer_hand[x], image = card_img, width = 73, height = 98)
+                picture.image = card_img
+                picture.grid()
+                
+
+            
+
+        def start_play(self):
+            
+            self.tinyframe[4].grid(row = 4, column = 5)
+            self.tinyframe[5].grid(row = 4, column = 6)
+            self.parent.dealer.hit(self.parent.deck.take_card_hide())
+            print(self.parent.dealer.hand)
+            self.parent.dealer.hit(self.parent.deck.take_card())
+            print(self.parent.dealer.hand)
+            self.parent.player.hit(self.parent.deck.take_card())
+            self.parent.player.hit(self.parent.deck.take_card())
+            update_cards()
+
+        def add_bet_5():
+            self.parent.player.make_wager(self.variable.get())
+            for x in range(len(self.tinyframe)-2):
+                self.tinyframe[x].grid_forget()
+            
+            self.parent.message.configure(text = "WAGER: ${:.2f}".format(self.variable.get()))
+            start_play(self)
+            
+        def add_bet_10():
+            self.parent.player.make_wager(self.variable.get()*2)
+            for x in range(len(self.tinyframe)-2):
+                self.tinyframe[x].grid_forget()
+            self.parent.message.configure(text = "WAGER:  ${:.2f}".format(self.variable.get()*2))
+            start_play(self)
+                
+           
+        def add_bet_15():
+            self.parent.player.make_wager(self.variable.get()*3)
+            for x in range(len(self.tinyframe)-2):
+                self.tinyframe[x].grid_forget()
+                
+            self.parent.message.configure(text = "WAGER: ${:.2f}".format(self.variable.get()*3))
+            start_play(self)
+        def add_bet_20():
+            self.parent.player.make_wager(self.variable.get()*4)
+            for x in range(len(self.tinyframe)-2):
+                self.tinyframe[x].grid_forget()
+            
+            self.parent.message.configure(text = "WAGER: ${:.2f}".format(self.variable.get()*4))
+            start_play(self)
 
 
         ##Betting buttons
-        five_bet = ttk.Button(tinyframe_1, text="$5.00", command = set_vary_5)
+        five_bet = ttk.Button(self.tinyframe[0], text="${:.2f}".format(self.variable.get()), command = add_bet_5)
         
         five_bet.grid(row = 0, column = 0)
-        ten_bet = ttk.Button(tinyframe_2, text="$10.00", command = set_vary_10)
+        ten_bet = ttk.Button(self.tinyframe[1], text= "${:.2f}".format(self.variable.get()*2), command = add_bet_10)
         
         ten_bet.grid(row = 0, column = 0)
-        fifteen_bet = ttk.Button(tinyframe_3, text="$15.00", command = set_vary_15)
+        fifteen_bet = ttk.Button(self.tinyframe[2], text="${:.2f}".format(self.variable.get()*3), command = add_bet_15)
         
         fifteen_bet.grid(row = 0, column = 0)
-        twenty_bet = ttk.Button(tinyframe_4, text="$20.00", command = set_vary_20)
+        twenty_bet = ttk.Button(self.tinyframe[3], text ="${:.2f}".format(self.variable.get()*4), command = add_bet_20)
         
         twenty_bet.grid(row = 0, column = 0)
 
-        self.window.mainloop()
+        #Hit/Stay button 
+        hit_button = ttk.Button(self.tinyframe[4], text ="Hit!".format(self.variable.get()*4), command = add_bet_20)
+        
+        hit_button.grid(row = 0, column = 0)
+        stay_button = ttk.Button(self.tinyframe[5], text ="Stay".format(self.variable.get()*4), command = add_bet_20)
+        stay_button.grid()
+        

@@ -78,3 +78,6 @@ for the CPU game, you have a certain number of hands that you order it to play.
 For the player game, you play a hand, and then it asks you if you'd like to play again, keeping track of your earnings if so. 
 
 
+----------------------------
+
+FIX CARD DISPLAYS AND FINISH GAME
