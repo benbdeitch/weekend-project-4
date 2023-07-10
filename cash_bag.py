@@ -13,3 +13,6 @@ class Cash_Bag:
     
     def subtract(self, cash):
         self -= cash
+    
+    def get(self):
+        return self.value

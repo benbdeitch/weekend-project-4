@@ -110,7 +110,8 @@ class Game_Window:
         top_frame.grid(row = 0, column = 0)
         dealer_label = tk.Label(top_frame, text = "Dealer's Hand")
         dealer_label.grid()
-
+        dealer_cash = tk.Label(top_frame, text = "$-{:.2f}".format(self.player.get_cash()))
+        dealer_cash.grid()
         bottom_frame = tk.Frame(self.window, bg = 'red', height = 150, padx = 20, pady = 40)
         bottom_frame.grid(row = 3, column = 0)
         player_label = tk.Label(bottom_frame, text = "Player's Hand")
@@ -158,10 +159,11 @@ class Starter:
      
         self.tinyframe.append( tk.Frame(window, bg = 'green', padx = 20, pady = 20))
         
+        def chec
 
         def update_cards():
             for x in range(len(self.parent.dealer.hand)):
-                data = self.parent.player.hand[x].to_image()
+                data = self.parent.dealer.hand[x].to_image()
                 image_name = data[1]
                 data = data[0]
                 print(image_name)
@@ -171,7 +173,20 @@ class Starter:
                 picture = tk.Label(self.parent.dealer_hand[x], image = card_img, width = 73, height = 98)
                 picture.image = card_img
                 picture.grid()
-                
+                data = self.parent.player.hand[x].to_image()
+                image_name = data[1]
+                data = data[0]
+                print(image_name)
+                image1 = Image.open(image_name)
+                cropped_image = image1.crop((data[0], data[1], data[2], data[3]))
+                card_img= ImageTk.PhotoImage(cropped_image)
+                picture = tk.Label(self.parent.player_hand[x], image = card_img, width = 73, height = 98)
+                picture.image = card_img
+                picture.grid()
+            five_bet.grid_forget()
+            ten_bet.grid_forget()
+            fifteen_bet.grid_forget()
+            twenty_bet.grid_forget()
 
             
 

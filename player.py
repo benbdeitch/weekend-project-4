@@ -28,7 +28,8 @@ class Player:
 
 
     ##Cash related methods
-
+    def get_cash(self):
+        return self.cash.get()
     def make_wager(self, bet):
         self.wager += bet
     
