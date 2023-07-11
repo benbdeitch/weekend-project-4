@@ -35,7 +35,8 @@ class Card:
             case "ace":
                 self.value = [11,1]
         
-
+    def show_me(self):
+        self.show = True
 
     def hide(self):
         self.show = False

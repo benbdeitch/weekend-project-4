@@ -164,9 +164,11 @@ class Starter:
      
         self.tinyframe.append( tk.Frame(window, bg = 'green', padx = 20, pady = 20))
         
+        
         def reveal_hand():
-            for x in self.parent.dealer.hand():
-                x.show()
+            for x in self.parent.dealer.hand:
+                x.show_me()
+            update_cards(self.parent.dealer)
             
         def score_loop(entity):
             score = entity.score_hand()
@@ -178,17 +180,19 @@ class Starter:
                 case _:
                     return score
             
-        def you_lose():
-            pass
+         
         def update_cards(player):
             if player == self.parent.player:
-                self.picture = self.player_picture
+               for x in self.parent.player_hand:
+                   for y in x.winfo_children():
+                       y.grid_forget()
             else:
                 self.picture = self.dealer_picture
-            for x in self.dealer_picture:
-                x.grid_forget()
-            else:
-                self.picture = []
+                for x in self.parent.dealer_hand:
+                   for y in x.winfo_children():
+                       y.grid_forget()
+            
+            self.picture = []
             for x in range(len(player.hand)):
                 data = player.hand[x].to_image()
                 image_name = data[1]
@@ -209,6 +213,29 @@ class Starter:
             fifteen_bet.grid_forget()
             twenty_bet.grid_forget()
 
+        def game_win():
+            pass
+
+        def game_lose():
+            reveal_hand()
+            self.parent.message.configure(text = "You lose")
+
+        def stay(event):
+            reveal_hand()
+            while self.parent.dealer.score_hand() < 17:
+
+                card = self.parent.deck.take_card()
+                self.parent.dealer.hit(card)
+                data = card.to_image()
+                image_name = data[1]
+                data = data[0]
+                print(image_name)
+                image1 = Image.open(image_name)
+                cropped_image = image1.crop((data[0], data[1], data[2], data[3]))
+                card_img= ImageTk.PhotoImage(cropped_image)
+                self.picture.append(tk.Label(self.parent.player_hand[len(self.picture)% 6], image = card_img, width = 73, height = 98))
+
+
         def hit_me(event):
             card = self.parent.deck.take_card()
             self.parent.player.hit(card)
@@ -223,24 +250,20 @@ class Starter:
             self.picture[-1].image = card_img
             self.picture[-1].grid()
             self.parent.player.hit(card)
-            result = score_loop(self.parent.player)
+            result = self.parent.player.score_hand()
             match result:
                 case -1:
-                    pass
+                    game_lose()
 
 
 
 
-        def game_end(winner):
-            if winner:
-                pass 
-        def game_loop():
-            pass
-
+      
+        
 
         
         def start_play(self):
-            
+            self.parent.message.configure(text = "Hit or Stay?")
             self.tinyframe[4].grid(row = 4, column = 5)
             self.tinyframe[5].grid(row = 4, column = 6)
             self.parent.dealer.hit(self.parent.deck.take_card_hide())
@@ -252,8 +275,8 @@ class Starter:
             update_cards(self.parent.dealer)
             update_cards(self.parent.player)
             print(score_loop(self.parent.dealer))
-            if score_loop(self.parent.dealer) == "Blackjack!":
-                pass
+            #if score_loop(self.parent.dealer) == "Blackjack!":
+            
 
         def add_bet_5():
             self.parent.player.make_wager(self.variable.get())
@@ -306,6 +329,7 @@ class Starter:
         hit_button = ttk.Button(self.tinyframe[4], text ="Hit!".format(self.variable.get()*4))
         hit_button.bind('<Button-1>', hit_me)
         hit_button.grid(row = 0, column = 0)
-        stay_button = ttk.Button(self.tinyframe[5], text ="Stay".format(self.variable.get()*4), )
+        stay_button = ttk.Button(self.tinyframe[5], text ="Stay".format(self.variable.get()*4))
+        stay_button.bind('<Button-1>', stay)
         stay_button.grid()
         
